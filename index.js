@@ -3,9 +3,12 @@
  *
  */
 
+// Launch variants:
+// NODE_DEBUG=server node index.js
+// node index.js
+
 // Dependencies
 var server = require('./lib/server');
-var workers = require('./lib/workers');
 
 // Declare the app
 var app = {};
