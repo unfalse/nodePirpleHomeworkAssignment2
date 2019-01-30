@@ -24,7 +24,7 @@ const order = async function(data){
     }
 };
 
-// Places an order and pay immediately
+// Places an order
 // 
 // email: string, menuItems?: [], order?: true
 // Request:
@@ -33,14 +33,24 @@ const order = async function(data){
 // Response:
 //  200 / 400 + error
 order.post = data => {
-    const email = helpers.getEmailFromBody(data);
-    if (!email) {
-        return Promise.resolve({
+    const token = helpers.getTokenFromHeaders(data);
+    if (!token) {
+        return Promise.reject({
             ...helpers.code400,
             error: 'Missing required field'
         });
     }
 
+    const email = helpers.getEmailFromBody(data);
+    const cartId = helpers.getFieldFromBody('id', data);
+    if (!email || !cartId) {
+        return Promise.reject({
+            ...helpers.code400,
+            error: 'Missing required field'
+        });
+    }
+
+    
 }
 
 module.exports = order;

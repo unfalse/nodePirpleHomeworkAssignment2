@@ -47,15 +47,8 @@ _cart.get = () => {
 //  200 / 400 + error
 _cart.post = data => {
     const email = helpers.getEmailFromBody(data);
-    if (!email) {
-        return Promise.reject({
-            ...helpers.code400,
-            error: 'Missing required field'
-        });
-    }
-
     const menuItems = helpers.getObjectFromBody('menuItems', data);
-    if (!menuItems || menuItems.length === 0) {
+    if (!email || !menuItems || menuItems.length === 0) {
         return Promise.reject({
             ...helpers.code400,
             error: 'Missing required field'

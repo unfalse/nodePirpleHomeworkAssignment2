@@ -59,7 +59,6 @@ _menuItems.get = function(data) {
         : false;
     return verifyToken(token, email)
         .catch(err => { 
-            console.log('400 !');
             return Promise.reject({
                 ...helpers.code400,
                 error: 'Error on verifying token ', 
@@ -67,7 +66,6 @@ _menuItems.get = function(data) {
             });
         })
         .then(() => {
-            console.log('200 !');
             return Promise.resolve({
                 ...helpers.code200,
                 payload: MENU_ITEMS

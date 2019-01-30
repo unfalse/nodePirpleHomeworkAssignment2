@@ -138,6 +138,23 @@ _auth.verifyToken = async function(id, email) {
     return Promise.resolve(true);
 };
 
+// _auth.verifyTokenSync = (id, email) => {
+//     let tokenData;
+//     try {
+//         tokenData = await _data.read('tokens',id);
+//     }
+//     catch(err) {
+//         return Promise.reject(err);
+//     }
+//     if (tokenData.expires < Date.now()) {
+//         return Promise.reject('Token has expired');
+//     }
+//     if(tokenData.email !== email) {
+//         return Promise.reject('Wrong email');
+//     }
+//     return Promise.resolve(true);
+// }
+
 // [DELETE] Deletes token by the given id (or simply log out)
 // query: id
 _auth.delete = function(data) {
