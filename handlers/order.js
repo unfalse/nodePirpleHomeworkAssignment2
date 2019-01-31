@@ -4,14 +4,16 @@
  */
 
 // Dependencies
+const _data = require('../lib/dataAsync');
 const helpers = require('../lib/helpers');
+
+const ACCEPTABLE_METHODS = ['post'];
 
 // Order
 const _order = {};
 const order = async function(data){
-    const acceptableMethods = ['post','get','put','delete'];
-    if(acceptableMethods.indexOf(data.method) === -1) {
-        return Promise.resolve(helpers.code405);
+    if(!ACCEPTABLE_METHODS.includes(data.method)) {
+        return Promise.reject(helpers.code405);
     }
 
     let result;
@@ -34,23 +36,54 @@ const order = async function(data){
 //  200 / 400 + error
 order.post = data => {
     const token = helpers.getTokenFromHeaders(data);
+console.log('token!');
     if (!token) {
         return Promise.reject({
             ...helpers.code400,
             error: 'Missing required field'
         });
     }
-
     const email = helpers.getEmailFromBody(data);
-    const cartId = helpers.getFieldFromBody('id', data);
-    if (!email || !cartId) {
-        return Promise.reject({
-            ...helpers.code400,
-            error: 'Missing required field'
-        });
-    }
 
-    
+console.log(email);
+
+    return verifyToken(token, email)
+        .catch(err => Promise.reject({
+            ...helpers.code400,
+            error: 'Error on verifying token ', 
+            details: err
+        }))
+        .then(() => {
+            if (!email) {
+                return Promise.reject({
+                    ...helpers.code400,
+                    error: 'Missing required field'
+                });
+            }
+console.log('reading carts');
+            return _data.read('carts', email)
+                .catch(err => Promise.reject({
+                    ...helpers.code500,
+                    error: 'Could not read the shopping cart',
+                    details: err
+                }))
+        })
+        .then(cartData => {
+            if (!_data.fileExists('orders', email)) {
+                return Promise.reject({
+                    ...helpers.code400,
+                    error: 'This user already has created an order'
+                });
+            }
+console.log('creating order');
+            return _data.create('orders', email, cartData)
+                .catch(err => Promise.reject({
+                    ...helpers.code500,
+                    error: 'Could not create a new order',
+                    details: err
+                }))
+                .then(() => Promise.resolve(helpers.code200))
+        });
 }
 
 module.exports = order;

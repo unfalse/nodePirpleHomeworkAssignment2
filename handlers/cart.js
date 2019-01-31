@@ -78,7 +78,7 @@ _cart.post = data => {
             return _data.create('carts', email, cartData)
                 .catch(err => Promise.reject({
                     ...helpers.code500,
-                    error: 'Could not create the new cart',
+                    error: 'Could not create a new cart',
                     details: err
                 }))
                 .then(() => Promise.resolve(helpers.code200))

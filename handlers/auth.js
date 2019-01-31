@@ -163,20 +163,20 @@ _auth.delete = function(data) {
         ? data.queryStringObject.id.trim()
         : false;
     if (!id) {
-        return Promise.resolve({
+        return Promise.reject({
             ...helpers.code400,
             error: 'Missing required field'
         });
     }
     if (!_data.fileExists('tokens', id)) {
-        return Promise.resolve({
+        return Promise.reject({
             ...helpers.code400,
             error: 'Could not find the specified token.'
         });
     }
     return _data.delete('tokens', id)
         .catch(err => {
-            return Promise.resolve({
+            return Promise.reject({
                 ...helpers.code500,
                 error: 'Could not delete the specified token.',
                 details: err
