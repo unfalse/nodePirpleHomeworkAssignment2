@@ -6,6 +6,7 @@
 // Dependencies
 const _data = require('../lib/dataAsync');
 const helpers = require('../lib/helpers');
+const verifyToken = require('./auth').verifyToken;
 
 const ACCEPTABLE_METHODS = ['post'];
 
@@ -34,9 +35,8 @@ const order = async function(data){
 //  body: email, menuItems?, order?
 // Response:
 //  200 / 400 + error
-order.post = data => {
+_order.post = data => {
     const token = helpers.getTokenFromHeaders(data);
-console.log('token!');
     if (!token) {
         return Promise.reject({
             ...helpers.code400,
@@ -44,8 +44,13 @@ console.log('token!');
         });
     }
     const email = helpers.getEmailFromBody(data);
-
-console.log(email);
+    const action = helpers.getFieldFromBody('action', data);
+    if (!action) {
+        return Promise.reject({
+            ...helpers.code400,
+            error: 'Missing action field'
+        });
+    }
 
     return verifyToken(token, email)
         .catch(err => Promise.reject({
@@ -54,28 +59,21 @@ console.log(email);
             details: err
         }))
         .then(() => {
-            if (!email) {
-                return Promise.reject({
-                    ...helpers.code400,
-                    error: 'Missing required field'
-                });
+            if (action === 'create') {
+                createOrder(data);
+            } else if (action === 'pay') {
+                payForOrder(data);
             }
-console.log('reading carts');
-            return _data.read('carts', email)
-                .catch(err => Promise.reject({
-                    ...helpers.code500,
-                    error: 'Could not read the shopping cart',
-                    details: err
-                }))
+
+            
         })
         .then(cartData => {
-            if (!_data.fileExists('orders', email)) {
+            if (_data.fileExists('orders', email)) {
                 return Promise.reject({
                     ...helpers.code400,
                     error: 'This user already has created an order'
                 });
             }
-console.log('creating order');
             return _data.create('orders', email, cartData)
                 .catch(err => Promise.reject({
                     ...helpers.code500,
@@ -84,6 +82,28 @@ console.log('creating order');
                 }))
                 .then(() => Promise.resolve(helpers.code200))
         });
+}
+
+// TODO: finish it !!!
+const createOrder = () => {
+    console.log('Creating order!');
+    return Promise.resolve()
+    if (!email) {
+        return Promise.reject({
+            ...helpers.code400,
+            error: 'Missing required field'
+        });
+    }
+    return _data.read('carts', email)
+        .catch(err => Promise.reject({
+            ...helpers.code500,
+            error: 'Could not read the shopping cart',
+            details: err
+        }))
+}
+
+const payForOrder = () => {
+    console.log('Paying for order!');
 }
 
 module.exports = order;
